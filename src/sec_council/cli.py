@@ -17,6 +17,7 @@ from .router import route
 from .sandbox import run_python_docker
 from .scientific_bridge import handoff
 from .static_audit import inventory
+from .conversation import start_conversation, resume_conversation, add_event
 from .skills import activate_skill, load_skill, read_resource
 
 
@@ -95,6 +96,25 @@ def build_parser() -> argparse.ArgumentParser:
                              help="Assert the host really supports native subagents")
             sub.add_argument("--max-roles", type=int, default=4)
 
+    dialogue = commands.add_parser("dialogue", help="Durable conversational project state")
+    dialogue_actions = dialogue.add_subparsers(dest="dialogue_action", required=True)
+    start = dialogue_actions.add_parser("start", help="Record a no-edit code conversation")
+    start.add_argument("--project", required=True, type=Path)
+    start.add_argument("--file", required=True, type=Path)
+    start.add_argument("--message", required=True)
+    status = dialogue_actions.add_parser("status", help="Read compact current project context")
+    status.add_argument("--project", required=True, type=Path)
+    event = dialogue_actions.add_parser("record", help="Record a durable project milestone")
+    event.add_argument("--project", required=True, type=Path)
+    event.add_argument("--kind", required=True)
+    event.add_argument("--detail", required=True)
+    event.add_argument("--actor", choices=("agent", "user", "checker", "reviewer"),
+                       default="agent")
+    event.add_argument("--proposal-id")
+    event.add_argument("--evidence-ref", action="append", default=[])
+    event.add_argument("--user-confirmed", action="store_true",
+                       help="Only if an actual user message explicitly confirmed this decision")
+
     run = commands.add_parser("run", help="Docker-only Python execution")
     run.add_argument("--source", type=Path, required=True)
     run.add_argument("--script", required=True)
@@ -159,6 +179,17 @@ def dispatch(args: argparse.Namespace) -> dict:
                 supports_native_subagents=args.native_subagents,
                 max_roles=budget.max_agents)
         return output
+    if args.command == "dialogue":
+        if args.dialogue_action == "start":
+            result = start_conversation(args.project, args.file, args.message)
+        elif args.dialogue_action == "status":
+            result = resume_conversation(args.project)
+        else:
+            result = add_event(args.project, kind=args.kind, detail=args.detail,
+                               actor=args.actor, proposal_id=args.proposal_id,
+                               evidence_refs=tuple(args.evidence_ref),
+                               user_confirmed=args.user_confirmed)
+        return {"status": "OK", "conversation": result}
     if args.command == "run":
         return asdict(run_python_docker(
             args.source, args.script, args.logs, approved=args.approve_execution,
