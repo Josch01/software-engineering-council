@@ -58,7 +58,9 @@ def _local(source: str, relative: str) -> bytes:
         folder = folder.parent
     if not folder.is_dir():
         raise FileNotFoundError("Skill directory unavailable")
-    if not SAFE_PATH.fullmatch(relative):
+    if not SAFE_PATH.fullmatch(relative) or any(
+        segment in {".", ".."} for segment in relative.split("/")
+    ):
         raise ValueError("Invalid relative skill resource")
     path = inside(folder, relative)
     if not path.is_file() or path.stat().st_size > LIMIT:
