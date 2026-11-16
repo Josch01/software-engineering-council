@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .memory import _atomic_write, sha256_file
+from .budgets import ResourceBudget
 from .permissions import inside
 
 EVENTS = frozenset({
@@ -49,6 +50,8 @@ def start_conversation(project: Path, source: Path, initial_request: str) -> dic
     target = Path(source).resolve(strict=True)
     if not target.is_file() or target.suffix != ".py":
         raise ValueError("Expected an existing .py file")
+    if target.stat().st_size > ResourceBudget().max_file_bytes:
+        raise ValueError("Source exceeds bounded intake size; narrow the scope")
     if not initial_request.strip() or len(initial_request) > 12_000:
         raise ValueError("An initial user request is required")
     path = _state_path(root)
@@ -102,6 +105,8 @@ def add_event(
     """Record compact durable facts. Never treat a model's claims as run results."""
     root = _project(project)
     state = _load(root)
+    if state["status"] == "CLOSED":
+        raise PermissionError("Cannot change a closed conversation")
     if kind not in EVENTS:
         raise ValueError("Unsupported event type")
     if not detail.strip() or len(detail) > 3000:
@@ -131,6 +136,11 @@ def add_event(
             state["source_edit_authorized"] = True
             state["phase"] = "PLAN"
     elif kind == "USER_OBJECTIVE":
+        if state["objective"] != detail:
+            for old_id in state["approved_proposals"]:
+                state["proposals"][old_id]["state"] = "NEEDS_RECONFIRMATION"
+            state["approved_proposals"] = []
+            state["source_edit_authorized"] = False
         state["objective"] = detail
         state["phase"] = "GOAL_DEFINED"
     elif kind == "FINDING":
@@ -146,7 +156,7 @@ def add_event(
             raise PermissionError("No agreed objective or approved proposal to plan")
         state["phase"] = "PLAN"
     elif kind == "IMPLEMENTED":
-        if not state["approved_proposals"]:
+        if not state["source_edit_authorized"] or not state["approved_proposals"]:
             raise PermissionError("Source changes require an approved proposal")
         state["phase"] = "IMPLEMENTED_PENDING_TESTS"
         state["technical_acceptance"] = "NOT_PERFORMED"
@@ -166,8 +176,6 @@ def add_event(
         state["status"] = "CLOSED"
         state["phase"] = "CLOSED"
 
-    if state["status"] == "CLOSED" and kind != "CLOSED":
-        raise PermissionError("Cannot change a closed conversation")
     event = {
         "number": state["next_event_number"],
         "kind": kind, "detail": detail, "actor": actor,
