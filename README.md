@@ -35,7 +35,40 @@ An explicit --native-subagents flag asserts that capability; the CLI does not ve
 or create native agents. Remote skill files are treated as selected instructions,
 never as executable downloaded code.
 
-## Current scope: v0.2.0 (skill-driven foundation)
+## Flujo conversacional recomendado
+
+No necesitas introducir comandos después de cada mensaje. Basta con decirle al
+agente que tenga acceso a tus archivos:
+
+> "Analiza `optimizer.py`, trabajaremos con él. Quiero que entiendas su propósito,
+> detectes fallas y me propongas mejoras."
+
+Primero reconstruirá lo que hace el código, sin asumir un objetivo de optimización
+que aún no has expresado. Separará **errores comprobados**, **riesgos aún sin
+verificar**, **buenas decisiones** y **alternativas propuestas**. En esta fase no
+debe alterar el archivo original.
+
+Puedes continuar con mensajes como:
+
+> "Ahora audita tus propuestas y contrástalas con artículos."
+>
+> "Nuestro objetivo será mejorar velocidad sin sacrificar precisión."
+>
+> "Procede con la alternativa 2, pero define un baseline y pruebas."
+>
+> "Enséñame el resultado, qué pasó los tests y cuáles son los bloqueos."
+
+El agente anfitrión conserva las decisiones, restricciones y hallazgos, usando
+`CONVERSATION_STATE.json` cuando tenga un workspace local. El usuario no necesita
+usar esta CLI manualmente; sus comandos son infraestructura opcional para que el
+agente registre los hitos. El protocolo se describe en
+`protocols/CONVERSATIONAL_PROJECT_LIFECYCLE.md`.
+
+La conversación no lanza de forma automática subagentes nativos si el anfitrión
+no dispone de esa función. En tal caso, puede realizar revisiones secuenciales
+del mismo modelo sin presentarlas como revisión independiente.
+
+## Current scope: v0.3.0 (conversational skill-driven foundation)
 
 This repository implements a **working CLI**, integrated bounded project-intake dossiers (`analyze`), deterministic task routing, typed contracts, project memory, AST-only source inventory, gated metadata research through OpenAlex/Crossref, restricted open-access PDF download, OpenAlex reference discovery, scientific-skill handoff verification, and opt-in Docker-only execution with CPU/RAM/time/log budgets.
 
