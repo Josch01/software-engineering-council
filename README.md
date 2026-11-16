@@ -6,7 +6,7 @@
 
 ## Current scope: v0.1.0 (functional foundation)
 
-This repository implements a **working CLI**, deterministic task routing, typed contracts, project memory, AST-only source inventory, gated metadata research through OpenAlex/Crossref, restricted open-access PDF download, OpenAlex reference discovery, scientific-skill handoff verification, and opt-in Docker-only execution with CPU/RAM/time/log budgets.
+This repository implements a **working CLI**, integrated bounded project-intake dossiers (`analyze`), deterministic task routing, typed contracts, project memory, AST-only source inventory, gated metadata research through OpenAlex/Crossref, restricted open-access PDF download, OpenAlex reference discovery, scientific-skill handoff verification, and opt-in Docker-only execution with CPU/RAM/time/log budgets.
 
 It does **not** yet implement autonomous LLM providers, long-running multiagent orchestration, deep semantic verification of numerical algorithms, vector retrieval, graphical UX, or automatic mathematical certification. A prompt is not an executor; an AST syntax PASS is not algorithm correctness; an external skill handoff is not a skill invocation.
 
@@ -25,6 +25,10 @@ No account credentials are required to run offline commands.
 
 ~~~bash
 sec-council init caso-acor --goal "Auditar implementación ACOR" --workspace projects
+# Or: create a whole intake dossier automatically (choose a new project name)
+sec-council analyze caso-acor-auto --goal "Auditar implementación ACOR" --source ./my_project --workspace projects
+# Optional evidence discovery, authorized explicitly:
+sec-council analyze caso-acor-rag --goal "Ant colony optimization continuous domains" --source ./my_project --online --initial-papers 3 --download-pdfs
 sec-council route "Audita este código de optimización ACOR" --source ./my_project
 sec-council audit ./my_project
 sec-council search "ant colony optimization continuous domains" --limit 5 --online
