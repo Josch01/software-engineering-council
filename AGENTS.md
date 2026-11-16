@@ -12,6 +12,24 @@ Example: sec-council skill inspect scientific-rag --online
 Example: sec-council analyze case01 --goal "Audita ACOR" --source ./my_code --skill scientific-rag --online
 See protocols/SKILL_DRIVEN_ORCHESTRATION.md.
 
+## Natural conversation protocol
+
+When a user says "analiza tal codigo.py, trabajaremos con él", treat it as a
+long-lived advisory/code-review session even without a fixed optimization goal.
+**Read and understand the source first, then give a useful preliminary audit.**
+Classify each claim as confirmed bug, suspected risk, improvement candidate or
+unknown. Mention positives. Cite file locations and indicate what was not run.
+Do not modify source yet.
+
+Follow-up instructions like "audita tu propuesta", "ahora quiero optimizar X",
+"prueba el algoritmo", "vamos con la opción 2" continue the SAME project;
+carry over constraints and decisions except what the user changes explicitly.
+Scope implementation behind explicit approval, preserve a baseline and compare
+against independent tests. Apply protocols/CONVERSATIONAL_PROJECT_LIFECYCLE.md.
+The host should use the conversation-state module if a workspace exists, but the
+human user need not operate the CLI. State files are records, never proof that
+an AI agent, test, or experiment actually ran.
+
 For general engineering work without a separate user-selected skill, read this repository's SKILL.md, protocols/ENGINEERING_GATES.md, config/council.toml and the relevant agent charter. Work only within the chosen project scope. Never edit another skill repository without approval.
 
 - Maintain exact TaskRequest, CasePacket, objective, active assumptions and evidence IDs.
