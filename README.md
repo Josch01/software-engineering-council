@@ -4,11 +4,42 @@
 
 [![CI](https://github.com/Josch01/software-engineering-council/actions/workflows/ci.yml/badge.svg)](https://github.com/Josch01/software-engineering-council/actions/workflows/ci.yml)
 
-## Current scope: v0.1.0 (functional foundation)
+## Skill-driven, one-host design
+
+**The user chooses the skill. The current host AI reads that skill and dynamically selects its own roles.** No mandatory Gemini+Codex collaboration, no forced second model. If the host supports native subagents it may spawn them; otherwise it uses sequential bounded role passes. A CLI manifest does not execute any LLM or create a real native subagent.
+
+Choose a skill by alias, local folder or public GitHub repository (remote requires --online).
+The repository ships with aliases software-engineering-council and scientific-rag
+(the latter pinned to a known reviewed commit). Add more aliases in config/skills.json.
+
+~~~bash
+sec-council skill list
+sec-council skill inspect scientific-rag --online
+sec-council init case01 --goal "Estudiar el problema" --workspace projects
+sec-council skill activate scientific-rag --goal "Estudiar el problema" --project projects/case01 --online
+sec-council analyze case02 --goal "Auditar ACOR" --source ./my_project --skill scientific-rag --online
+~~~
+
+For local skills:
+~~~bash
+sec-council skill inspect /path/to/skill
+sec-council skill activate /path/to/skill --goal "Investigar" --project projects/case01
+sec-council skill read /path/to/skill --file agents/ROUTER.md
+~~~
+
+The activation creates skill_session/ACTIVE_SKILL.md (exact snapshot),
+HOST_INSTRUCTIONS.md and SESSION.json with a content hash and role-selection policy.
+The same host reads these files, chooses a minimal panel and invokes native subagents
+ONLY if its runtime supports them. Otherwise it performs scoped sequential passes.
+An explicit --native-subagents flag asserts that capability; the CLI does not verify
+or create native agents. Remote skill files are treated as selected instructions,
+never as executable downloaded code.
+
+## Current scope: v0.2.0 (skill-driven foundation)
 
 This repository implements a **working CLI**, integrated bounded project-intake dossiers (`analyze`), deterministic task routing, typed contracts, project memory, AST-only source inventory, gated metadata research through OpenAlex/Crossref, restricted open-access PDF download, OpenAlex reference discovery, scientific-skill handoff verification, and opt-in Docker-only execution with CPU/RAM/time/log budgets.
 
-It does **not** yet implement autonomous LLM providers, long-running multiagent orchestration, deep semantic verification of numerical algorithms, vector retrieval, graphical UX, or automatic mathematical certification. A prompt is not an executor; an AST syntax PASS is not algorithm correctness; an external skill handoff is not a skill invocation.
+It does **not** yet implement native agent spawning, an autonomous LLM runtime, long-running multiagent orchestration, deep semantic verification of numerical algorithms, vector retrieval, graphical UX, or automatic mathematical certification. A prompt is not an executor; an AST syntax PASS is not algorithm correctness; an external skill handoff is not a skill invocation.
 
 ### Install
 
@@ -71,6 +102,7 @@ The container has no network, read-only source, read-only root filesystem, non-r
 - scientific_bridge.py: pinned interoperability with the existing scientific RAG skill
 - sandbox.py: Docker-only bounded execution
 - gates.py: independent technical review
+- skills.py: explicit skill selection, bounded reading and same-host activation manifests
 - cli.py: explicit user-facing commands
 
 See SKILL.md and AGENTS.md for operating rules, protocols/ for decision gates, agents/ for role charters.
