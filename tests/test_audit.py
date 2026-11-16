@@ -26,6 +26,7 @@ class AuditTests(unittest.TestCase):
             root = Path(directory)
             (root / "bad.py").write_text("def f(:\n")
             self.assertEqual(inventory(root)["syntax_gate"], "FAIL")
+            (root / "second.py").write_text("pass\n")
             with self.assertRaises(BudgetExceeded):
                 inventory(root, ResourceBudget(max_files_scanned=1, max_file_bytes=1))
 
