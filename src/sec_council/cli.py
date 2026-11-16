@@ -8,6 +8,8 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .budgets import ResourceBudget
+from .config import load_budget
+from .pipeline import analyze_project
 from .contracts import CasePacket, TaskRequest
 from .literature import cited_references, doi_metadata, download_pdf, search_openalex
 from .memory import new_project
@@ -56,6 +58,16 @@ def build_parser() -> argparse.ArgumentParser:
     bridge.add_argument("--skill-path", type=Path, required=True)
     bridge.add_argument("--goal", required=True)
 
+    analyze = commands.add_parser("analyze", help="Create bounded project dossier and task plan")
+    analyze.add_argument("name")
+    analyze.add_argument("--goal", required=True)
+    analyze.add_argument("--source", type=Path)
+    analyze.add_argument("--workspace", type=Path, default=Path("projects"))
+    analyze.add_argument("--config", type=Path)
+    analyze.add_argument("--online", action="store_true")
+    analyze.add_argument("--initial-papers", type=int, default=3)
+    analyze.add_argument("--download-pdfs", action="store_true")
+
     run = commands.add_parser("run", help="Docker-only Python execution")
     run.add_argument("--source", type=Path, required=True)
     run.add_argument("--script", required=True)
@@ -89,6 +101,12 @@ def dispatch(args: argparse.Namespace) -> dict:
         packet = CasePacket(args.goal, "Mathematical/theoretical question", (), (), (),
                             "Evaluate exact assumptions and certify only if applicable")
         return handoff(packet, args.skill_path)
+    if args.command == "analyze":
+        budget = load_budget(args.config) if args.config else ResourceBudget()
+        return analyze_project(workspace=args.workspace, project_name=args.name,
+                               goal=args.goal, source=args.source, online=args.online,
+                               initial_papers=args.initial_papers,
+                               download_pdfs=args.download_pdfs, budget=budget)
     if args.command == "run":
         return asdict(run_python_docker(
             args.source, args.script, args.logs, approved=args.approve_execution,
