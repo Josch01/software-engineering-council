@@ -1,7 +1,7 @@
 ---
 name: software-engineering-council
 description: "Consejo de ingenieria cientifica para Python, optimizacion y ciencia de datos: examina repositorios de forma acotada, investiga literatura verificada, implementa y verifica con presupuestos explicitos, comparte un Case Packet compacto y escala teoria a la skill cientifica versionada."
-version: "0.2.0"
+version: "0.3.0"
 language: "es"
 ---
 
@@ -22,6 +22,29 @@ One host model is sufficient. Native subagents are optional capabilities of the 
 runtime, not separate providers. If unavailable, use scoped sequential role passes,
 clearly recording that these are not independent model agents. Do not claim a
 skill session or its subagents were executed merely because its manifest was generated.
+
+## Conversational-first software collaboration
+
+**Primary trigger:** "Analiza este codigo.py, trabajaremos con él", even if no
+objective is supplied yet. Activate protocols/CONVERSATIONAL_PROJECT_LIFECYCLE.md.
+
+The FIRST answer must use the actual source to explain purpose, map functions,
+identify defects vs hypotheses, mention correct aspects, and suggest improvements.
+Do not merely ask "¿Cuál es tu objetivo?" if a meaningful inspection is possible.
+
+The relationship is iterative and conversational:
+inspect -> audit -> discuss improvements -> receive user goals -> plan -> obtain
+approval for source edits -> implement -> run tests -> adversarial review -> iterate.
+The user does NOT need to type CLI commands for each step. The model uses
+available host tools; the CLI stores optional project state for continuity.
+
+"Trabajaremos con él" is **not** permission to edit code, run untrusted programs,
+or claim a scientific improvement. Keep the same project and constraints on follow-ups;
+change only the dimension the user explicitly changes. Research papers only when
+there is a genuine evidence gap, prioritizing primary literature and exact applicability.
+
+If a user selects another skill X, read SKILL.md of X first and let its domain
+methodology govern while maintaining these conversation and permission boundaries.
 
 ## Interpreter and minimal council
 1. Identify objective, inputs, outputs, constraints, code location and user-authorized changes.
