@@ -55,7 +55,7 @@ class ConversationTests(unittest.TestCase):
                   detail="Revisor detectó dominio no cubierto", actor="reviewer")
         final = resume_conversation(self.project)
         self.assertEqual(final["technical_acceptance"], "NOT_PERFORMED")
-        self.assertEqual(final["events_recorded"], 7)
+        self.assertEqual(final["events_recorded"], 6)
 
     def test_objective_follows_user(self):
         start_conversation(self.project, self.source, "Analiza antes de cambiar")
@@ -65,10 +65,12 @@ class ConversationTests(unittest.TestCase):
                           actor="user", user_confirmed=True)
         self.assertEqual(state["objective"], "Minimizar tiempo")
         self.assertFalse(state["source_edit_authorized"])
+        plan = add_event(self.project, kind="PLAN", detail="Proponer plan de optimización")
+        self.assertEqual(plan["phase"], "PLAN")
+        # Planning is allowed after goal alignment; editing is still not authorized.
+        self.assertFalse(plan["source_edit_authorized"])
         with self.assertRaises(PermissionError):
-            add_event(self.project, kind="PLAN", detail="Optimizar ahora")
-        # Plans are allowed with defined objective; no source modifications.
-        # Planned work still requires explicit proposal approval before implementation.
+            add_event(self.project, kind="IMPLEMENTED", detail="Cambio sin permiso")
         self.assertEqual(resume_conversation(self.project)["status"], "IN_DISCUSSION")
 
     def test_no_claim_of_completed_audit_from_state(self):
