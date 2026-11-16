@@ -73,6 +73,22 @@ class ConversationTests(unittest.TestCase):
             add_event(self.project, kind="IMPLEMENTED", detail="Cambio sin permiso")
         self.assertEqual(resume_conversation(self.project)["status"], "IN_DISCUSSION")
 
+    def test_new_goal_revokes_old_edit_authorization(self):
+        start_conversation(self.project, self.source, "Analiza el código")
+        add_event(self.project, kind="PROPOSAL", proposal_id="P01",
+                  detail="Optimizar coste de fitness")
+        approved = add_event(self.project, kind="USER_APPROVAL",
+                             detail="Apruebo la propuesta P01", actor="user",
+                             user_confirmed=True, proposal_id="P01")
+        self.assertTrue(approved["source_edit_authorized"])
+        state = add_event(self.project, kind="USER_OBJECTIVE",
+                          detail="Ahora priorizamos estabilidad en vez de velocidad",
+                          actor="user", user_confirmed=True)
+        self.assertFalse(state["source_edit_authorized"])
+        self.assertEqual(state["proposals"]["P01"]["state"], "NEEDS_RECONFIRMATION")
+        with self.assertRaises(PermissionError):
+            add_event(self.project, kind="IMPLEMENTED", detail="Cambio no reconfirmado")
+
     def test_no_claim_of_completed_audit_from_state(self):
         start_conversation(self.project, self.source, "Review")
         raw = json.loads((self.project / "CONVERSATION_STATE.json").read_text())
