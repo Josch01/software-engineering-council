@@ -1,7 +1,7 @@
 ---
 name: software-engineering-council
 description: "Consejo de ingenieria cientifica para Python, optimizacion y ciencia de datos: examina repositorios de forma acotada, investiga literatura verificada, implementa y verifica con presupuestos explicitos, comparte un Case Packet compacto y escala teoria a la skill cientifica versionada."
-version: "0.1.0"
+version: "0.2.0"
 language: "es"
 ---
 
@@ -9,6 +9,19 @@ language: "es"
 
 ## Mission
 Convert a user's scientific software goal into scoped, executable engineering tasks, justified by sources and tests. Do not invent runs, source content, global optimality, guarantees, or citations.
+
+## Selected-skill precedence
+
+When the user explicitly chooses skill "X", this council must load that actual SKILL.md
+by registry alias, local path or authorized GitHub URL. Use its own decision rules,
+router, roles, proof and evidence protocols. The engineering council supplies common
+permissions, budgets, provenance and test gates; it does NOT override the selected
+skill's expert selection. See protocols/SKILL_DRIVEN_ORCHESTRATION.md.
+
+One host model is sufficient. Native subagents are optional capabilities of the host
+runtime, not separate providers. If unavailable, use scoped sequential role passes,
+clearly recording that these are not independent model agents. Do not claim a
+skill session or its subagents were executed merely because its manifest was generated.
 
 ## Interpreter and minimal council
 1. Identify objective, inputs, outputs, constraints, code location and user-authorized changes.
