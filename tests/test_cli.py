@@ -42,6 +42,32 @@ class CliTests(unittest.TestCase):
             self.assertEqual(rc2, 0)
             self.assertEqual(inspected["skill"]["name"], "example-skill")
 
+    def test_dialogue_in_chat_workflow(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "method.py"
+            source.write_text("def objective(x):\n    return x*x\n")
+            rc, project_info = self.call([
+                "init", "example", "--goal", "Inspeccionar el algoritmo",
+                "--workspace", str(root / "projects")])
+            self.assertEqual(rc, 0)
+            project = project_info["path"]
+            rc, first = self.call([
+                "dialogue", "start", "--project", project, "--file", str(source),
+                "--message", "Analiza este método, trabajaremos con él"])
+            self.assertEqual(rc, 0)
+            self.assertEqual(first["conversation"]["phase"], "UNDERSTAND_SOURCE")
+            self.assertFalse(first["conversation"]["source_edit_authorized"])
+            rc, proposal = self.call([
+                "dialogue", "record", "--project", project,
+                "--kind", "PROPOSAL", "--detail", "Reducir llamadas al fitness",
+                "--proposal-id", "P1"])
+            self.assertEqual(rc, 0)
+            self.assertEqual(proposal["conversation"]["phase"], "DISCUSS_OPTIONS")
+            rc, final = self.call(["dialogue", "status", "--project", project])
+            self.assertEqual(rc, 0)
+            self.assertEqual(final["conversation"]["events_recorded"], 1)
+
     def test_project_init(self):
         with tempfile.TemporaryDirectory() as directory:
             code, result = self.call(["init", "case1", "--goal", "audit",
