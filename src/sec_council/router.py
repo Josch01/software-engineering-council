@@ -50,6 +50,8 @@ def route(request: TaskRequest, max_agents: int = 4) -> Route:
     escalate = theory
     if has_source and theory and "scientific-lead" not in workers:
         workers = (*workers, "scientific-lead")
+    if max_agents == 1:
+        reviewer, workers = None, ()
     ordered = tuple(dict.fromkeys((lead, *workers, *((reviewer,) if reviewer else ()))))
     if len(ordered) > max_agents:
         retained = ordered[:max_agents - (1 if reviewer else 0)]
