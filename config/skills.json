@@ -1,0 +1,11 @@
+{
+  "software-engineering-council": {
+    "source": "..",
+    "description": "Skill de ingeniería del propio repositorio"
+  },
+  "scientific-rag": {
+    "source": "https://github.com/Josch01/skill-investigacion-cientifica-rag",
+    "ref": "cc3388d4eca22de293763e6426746e5b6f85c2ea",
+    "description": "Skill científica fijada a una revisión; usa --online"
+  }
+}
