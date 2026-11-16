@@ -1,0 +1,34 @@
+[council]
+max_agents = 4
+default_mode = "single-provider-sequential"
+independent_review_required = true
+
+[research]
+max_initial_papers = 5
+max_search_queries = 8
+max_pdf_bytes = 20000000
+metadata_before_pdf = true
+follow_citations_on_evidence_gap = true
+require_locator_for_claim = true
+
+[context]
+max_case_chars = 12000
+max_files_scanned = 250
+max_file_bytes = 256000
+max_log_bytes = 2000000
+core_memory_only_on_start = true
+
+[execution]
+docker_only = true
+network_enabled = false
+approve_execution_required = true
+max_cpu = 4.0
+max_ram_mb = 4096
+timeout_seconds = 900
+container_image = "python:3.12-slim"
+
+[scientific_skill]
+repository = "https://github.com/Josch01/skill-investigacion-cientifica-rag"
+commit = "cc3388d4eca22de293763e6426746e5b6f85c2ea"
+version = "3.1.0"
+autorun = false
